@@ -1,6 +1,9 @@
 teensy_firmware_6.3/
 teensy_firmware_8/
 teensy_interface/
+__pycache__/
 build/
 .svn
 .DS_Store
+.venv
+.env
