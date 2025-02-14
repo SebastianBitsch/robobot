@@ -1,0 +1,74 @@
+#!/bin/sh
+#
+# /etc/init.d/host_rename.sh
+# Subsystem file for "Robobot" host rename function
+#
+# chkconfig: 2345 95 05
+# description: Robobot rename service
+#
+# processname: none
+# config: /home/local/svn/robobot/setup/none
+# pidfile: /var/run/Robobot.pid
+
+# source function library
+#. /etc/rc.d/init.d/functions
+
+# pull in sysconfig settings
+# [ -f /etc/sysconfig/mySystem ] && . /etc/sysconfig/mySystem
+
+RETVAL=0
+prog="teensy_interfac"
+
+start() {
+	echo -n $"Starting rename, not $prog:"
+	/home/local/svn/robobot/setup/rename_host.bash &
+# 	RETVAL=$?
+# 	[ "$RETVAL" = 0 ] && touch /var/lock/subsys/$prog
+	echo
+}
+
+stop() {
+	echo -n $"Stopping $prog:"
+	pkill $prog -TERM
+	RETVAL=$?
+# 	[ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/$prog
+	echo
+}
+
+reload() {
+	echo -n $"Reloading $prog:"
+	pkill $prog -HUP
+	RETVAL=$?
+	echo
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	reload)
+		reload
+		;;
+	condrestart)
+		if [ -f /var/lock/subsys/$prog ] ; then
+			stop
+			# avoid race
+			sleep 3
+			start
+		fi
+		;;
+	status)
+		status $prog
+		RETVAL=$?
+		;;
+		echo $"Usage: $0 {start|stop|restart|reload|condrestart|status}"
+		RETVAL=1
+esac
+exit $RETVAL

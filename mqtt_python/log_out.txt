@@ -1,0 +1,58 @@
+% Starting
+% Command line argument '--silent'=False
+% ConnectedOut to MQTT Broker localhost on 1883
+% Connected to MQTT Broker localhost on 1883
+% GPIO all ok
+% Robot (srobot.py) data stream OK; 13 loops.
+% IR sensor (sir.py):: got data stream; 0 loops.
+% Teensy info 1738868189.7124 # got confw: r1=0.075, r2=0.075, G=19, PPR=68, WB=0.23
+% SPose.py:: Robot config info 1 at 0:00:00.512844
+%    - Wheel radius (left,right): (0.075, 0.075 m
+%    - Encoder tick per rev: 68.0
+%    - Gearing: 19.0:1
+%    - Wheel base: 0.23 m
+%    - Encoder reversed: 0.0 (1 = reversed)
+% Pose:: configured, and got data stream; 1 loops.
+% IMU (simu.py):: no data updates after 21 wait loops (continues).
+% Edge (sedge.py):: turns on line sensor
+% Camera available: size (616x820, 3 channels)
+% Edge (sedge.py):: got data stream; after 1
+% (uservice.py) Setup finished with connected=True
+% Starting
+LineCtrl:: PIDrecalculate: T=0.10 -> 9.65 ms
+%% Lead: tauZ 0.800 sec, tauP = 0.150 sec, T = 9.653 ms
+
+%%       tauZ2pT = 1.6097, tauZ2mT = 1.5903, tauP2pT = 0.3097, tauP2mT = 0.3097
+% Edge::followLine: ctrl: e=0.000, u=0.000, y=0.000 -> 0.250 0.000 1738868190.2006233
+% Edge::followLine: ctrl: e=0.000, u=0.000, y=0.000 -> 0.250 0.000 1738868190.4007695
+% State change from -1 to 12
+% State change from 12 to 14
+% --- state 14, h = 0.3283, t=0.315
+% I am now accepted as master of robot Emil
+
+% --- state 14, h = 0.5725, t=0.719
+% --- state 14, h = 0.7818, t=1.114
+% --- state 14, h = 1.0133, t=1.509
+% --- state 14, h = 1.2591, t=1.914
+% --- state 14, h = 1.4748, t=2.321
+% --- state 20, h = 1.6873, t=2.716
+% State change from 14 to 20
+% Saved image image_2025_Feb_06_195635_015.jpg
+% State change from 20 to 99
+% Mission finished/aborted; state=99
+% shutting down
+% Teensy info 1738868201.8912 # stopping
+% Teensy info 1738868201.8912 # stopping
+% Service - thread stopped
+% Service - thread stopped
+% Pose terminated
+% Robot terminated
+% Pose terminated
+% IR terminated
+% Edge (sedge.py):: turn off line sensor
+% Edge (sedge.py):: terminated
+% Camera thread stopped
+% Camera terminated
+% GPIO terminated
+% logfile closed
+% Main Terminated
