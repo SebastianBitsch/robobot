@@ -40,6 +40,7 @@ from sedge import edge
 from sgpio import gpio
 from scam import cam
 from uservice import service
+from ulog import flog
 
 
 # set title of process, so that it is not just called Python
@@ -67,9 +68,6 @@ def imageAnalysis(save):
 				cv.imwrite(fn, img)
 				if not service.args.silent:
 					print(f"% Saved image {fn}")
-			pass
-		pass
-	pass
 
 ############################################################
 
@@ -80,7 +78,6 @@ def stateTimePassed():
 ############################################################
 
 def loop():
-	from ulog import flog
 	state = 0
 	images = 0
 	ledon = True
@@ -89,9 +86,11 @@ def loop():
 	if not service.args.now:
 		print("% Ready, press start button")
 		service.send(service.topicCmd + "T0/leds","16 30 30 0") # LED 16: yellow - waiting
-	# main state machine
+	
+    # main state machine
 	edge.lineControl(0, 0) # make sure line control is off
 	while not (service.stop or gpio.stop()):
+
 		if state == 0: # wait for start signal
 			start = gpio.start() or service.args.now
 			if start:
@@ -102,6 +101,7 @@ def loop():
 				edge.lineControl(0.25, 0.0) # m/s and position on line -2.0..2.0
 				state = 12 # until no more line
 				pose.tripBreset() # use trip counter/timer B
+
 		elif state == 12: # following line
 			if edge.lineValidCnt == 0 or pose.tripBtimePassed() > 10:
 				# no more line
@@ -109,11 +109,13 @@ def loop():
 				pose.tripBreset()
 				service.send(service.topicCmd + "ti/rc","0.1 0.5") # turn left
 				state = 14 # turn left
+
 		elif state == 14: # turning left
 			if pose.tripBh > np.pi/2 or pose.tripBtimePassed() > 10:
 				state = 20 # finished   =17 go look for line
 				service.send(service.topicCmd + "ti/rc","0 0") # stop for images
 			print(f"% --- state {state}, h = {pose.tripBh:.4f}, t={pose.tripBtimePassed():.3f}")
+
 		elif state == 20: # image analysis
 			imageAnalysis(images == 2)
 			images += 1
@@ -153,7 +155,7 @@ def loop():
 		t.sleep(0.1)
 		# tell interface that we are alive
 		service.send(service.topicCmd + "ti/alive",str(service.startTime))
-		pass # end of while loop
+
 	# end of mission, turn LEDs off and stop
 	service.send(service.topicCmd + "T0/leds","16 0 0 0") 
 	gpio.set_value(20, 0)
@@ -165,13 +167,13 @@ def loop():
 ############################################################
 
 if __name__ == "__main__":
-		print("% Starting")
-		# where is the MQTT data server:
-		service.setup('localhost') # localhost
-		#service.setup('10.197.217.81') # Juniper
-		#service.setup('10.197.217.80') # Newton
-		#service.setup('10.197.218.172')
-		if service.connected:
-			loop()
-			service.terminate()
-		print("% Main Terminated")
+    print("% Starting")
+    # where is the MQTT data server:
+    service.setup('localhost') # localhost
+    #service.setup('10.197.217.81') # Juniper
+    #service.setup('10.197.217.80') # Newton
+    #service.setup('10.197.218.172')
+    if service.connected:
+        loop()
+        service.terminate()
+    print("% Main Terminated")
