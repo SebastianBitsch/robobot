@@ -48,7 +48,6 @@ setproctitle("mqtt-client")
 
 ############################################################
 
-
 def imageAnalysis(save):
 	if cam.useCam:
 		ok, img, imgTime = cam.getImage()
@@ -75,11 +74,15 @@ stateTime = datetime.now()
 def stateTimePassed():
 	return (datetime.now() - stateTime).total_seconds()
 
+def p(*args):
+	print(f"{args=}")
+
 ############################################################
 
 def loop():
 	state = 0
 	images = 0
+	n_frames_lost = 0
 	ledon = True
 	tripTime = datetime.now()
 	oldstate = -1
@@ -87,7 +90,7 @@ def loop():
 		print("% Ready, press start button")
 		service.send(service.topicCmd + "T0/leds","16 30 30 0") # LED 16: yellow - waiting
 	
-    # main state machine
+	# main state machine
 	edge.lineControl(0, 0) # make sure line control is off
 	while not (service.stop or gpio.stop()):
 
@@ -103,12 +106,19 @@ def loop():
 				pose.tripBreset() # use trip counter/timer B
 
 		elif state == 12: # following line
-			if edge.lineValidCnt == 0 or pose.tripBtimePassed() > 10:
+			if edge.lineValidCnt == 0: #  or pose.tripBtimePassed() > 10:
+				n_frames_lost += 1
+				if 10 < n_frames_lost:
+					print("ACTUALLY LOST")
+					state = 20
 				# no more line
-				edge.lineControl(0,0) # stop following line
-				pose.tripBreset()
-				service.send(service.topicCmd + "ti/rc","0.1 0.5") # turn left
-				state = 14 # turn left
+				# edge.lineControl(0,0) # stop following line
+				# pose.tripBreset()
+				# service.send(service.topicCmd + "ti/rc","0.1 0.5") # turn left
+				print("LOST LINE", pose.tripBtimePassed(), edge.lineValidCnt)
+				# state = 12 # turn left
+			else:
+				n_frames_lost = 0
 
 		elif state == 14: # turning left
 			if pose.tripBh > np.pi/2 or pose.tripBtimePassed() > 10:
@@ -162,18 +172,17 @@ def loop():
 	edge.lineControl(0,0) # stop following line
 	service.send(service.topicCmd + "ti/rc","0 0")
 	t.sleep(0.05)
-	pass
 
 ############################################################
 
 if __name__ == "__main__":
-    print("% Starting")
-    # where is the MQTT data server:
-    service.setup('localhost') # localhost
-    #service.setup('10.197.217.81') # Juniper
-    #service.setup('10.197.217.80') # Newton
-    #service.setup('10.197.218.172')
-    if service.connected:
-        loop()
-        service.terminate()
-    print("% Main Terminated")
+	print("% Starting")
+	# where is the MQTT data server:
+	service.setup('localhost') # localhost
+	#service.setup('10.197.217.81') # Juniper
+	#service.setup('10.197.217.80') # Newton
+	#service.setup('10.197.218.172')
+	if service.connected:
+		loop()
+		service.terminate()
+	print("% Main Terminated")

@@ -45,7 +45,7 @@ class SEdge:
 	edge_nInterval = 0
 	edgeIntervalSetup = 0.1
 	# line detection levels
-	lineValidThreshold = 750 # 1000 is calibrated white
+	lineValidThreshold = 550 # 1000 is calibrated white
 	crossingThreshold = 500 # average above this is assumed to be crossing line
 	# level for relevant white values
 	low = lineValidThreshold - 100
@@ -82,11 +82,21 @@ class SEdge:
 	lostLineCnt = 0
 	u = 0 # turn rate control signal
 
+    # PID loop
+	Kp = 0.5
+	Ki = 0.0
+	Kd = 0.4
+	total_error = 0.0
+	previous_error = 0.0
+	pid_i = 0.0
+
+
 
 	##########################################################
 
 	def setup(self):
 		from uservice import service
+
 		sendBlack = False
 		loops = 0
 		# turn line sensor on (command 'lip 1')
@@ -207,7 +217,7 @@ class SEdge:
 				self.edge[5] = int(gg[6])
 				self.edge[6] = int(gg[7])
 				self.edge[7] = int(gg[8])
-				t1 = self.edgeTime;
+				t1 = self.edgeTime
 				if self.edgeUpdCnt == 2:
 					self.edgeInterval = (t1 -t0).total_seconds()*1000
 				elif self.edgeUpdCnt > 2:
@@ -331,33 +341,50 @@ class SEdge:
 
 	def followLine(self):
 		from uservice import service
+
+		dt = self.edge_nInterval / 1000.0 # seconds
+
+		error = self.refPosition - self.position
+		self.total_error += error
+
+		self.pid_i += error * dt
+
+		diff_error = (error - self.previous_error) / dt
+
+		u = self.Kp * error + self.Ki * self.pid_i + self.Kd * diff_error
+		u = max(min(u, 1), -1) # bound
+
+		self.previous_error = error
+
+
 		# some parameters depend on sample time, adjust
 		# print(f"LineCtrl:: sample time {self.edge_nInterval}")
-		if abs(self.edge_nInterval - self.edgeIntervalSetup) > 2.0: # ms
-			self.PIDrecalculate()
-			self.edgeIntervalSetup = self.edge_nInterval
+		# if 2.0 < abs(self.edge_nInterval - self.edgeIntervalSetup): # ms
+		# 	self.PIDrecalculate()
+		# 	self.edgeIntervalSetup = self.edge_nInterval
 		# line to (much) the right gives a line position value.
 		# Then the robot is too much to the left.
 		# To correct we need a negative turnrate,
 		# so sign is OK
-		e = self.refPosition - self.position
-		self.u = self.lineKp * e; # error times Kp
+		# e = self.refPosition - self.position
+		# self.u = self.lineKp * e; # error times Kp
 		# Lead filter
-		self.lineY = (self.u * self.tauZ2pT - self.lineE1 * self.tauZ2mT + self.lineY1 * self.tauP2mT)/self.tauP2pT;
+		# self.lineY = (self.u * self.tauZ2pT - self.lineE1 * self.tauZ2mT + self.lineY1 * self.tauP2mT)/self.tauP2pT
 		#
-		if self.lineY > 1:
-			self.lineY = 1
-		elif self.lineY < -1:
-			self.lineY = -1
+		# if self.lineY > 1:
+		# 	self.lineY = 1
+		# elif self.lineY < -1:
+		# 	self.lineY = -1
 		# save old values
-		self.lineE1 = self.u;
-		self.lineY1 = self.lineY;
+		# self.lineE1 = self.u
+		# self.lineY1 = self.lineY
 		# make response
-		par = f"{self.velocity:.3f} {self.lineY:.3f} {t.time()}"
+		par = f"{self.velocity:.3f} {u:.3f} {t.time()}"
 		service.send(self.topicRc, par) # send new turn command, maintaining velocity
 		# debug print
 		if self.edge_nUpdCnt % 20 == 0:
-			print(f"% Edge::followLine: ctrl: e={e:.3f}, u={self.u:.3f}, y={self.lineY:.3f} -> {par}")
+			print(f"u: {u:.3f}, p:{self.Kp * error:.3f}, i:{self.Ki * self.pid_i:.3f}, d:{self.Kd * diff_error:.3f}")
+			# print(f"% Edge::followLine: ctrl: e={e:.3f}, u={self.u:.3f}, y={self.lineY:.3f} -> {par}")
 
 	##########################################################
 

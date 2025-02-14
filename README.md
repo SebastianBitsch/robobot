@@ -1,5 +1,12 @@
 # robobot project
 
+## Todo
+- [ ] Make sure we aren't lost when losing line for 1 frame
+- [ ] Decision making at crossroads
+    - [ ] Routing
+- [ ] 
+
+## Docs
 >[!NOTE]
 > This is a subset of nice to know and hard to remember commands. For anything else see the full [Wiki page](https://rsewiki.electro.dtu.dk/index.php/Robobot_B)
 
