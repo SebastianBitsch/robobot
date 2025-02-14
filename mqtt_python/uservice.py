@@ -69,20 +69,14 @@ class UService:
 	parser = argparse.ArgumentParser(description='Robobot app 2024')
 
 	def setup(self, mqtt_host):
-		#
 		from ulog import flog
 		flog.setup()
 		self.host = mqtt_host
-		self.parser.add_argument('-w', '--white', action='store_true',
-								help='Calibrate white tape level')
-		self.parser.add_argument('-g', '--gyro', action='store_true',
-								help='Calibrate gyro')
-		self.parser.add_argument('-l', '--level', action='store_true',
-								help='Calibrate horizontal')
-		self.parser.add_argument('-s', '--silent', action='store_true',
-								help='Print less to console')
-		self.parser.add_argument('-n', '--now', action='store_true',
-								help='Start drive now (do not wait for start button)')
+		self.parser.add_argument('-w', '--white', action='store_true', help='Calibrate white tape level')
+		self.parser.add_argument('-g', '--gyro', action='store_true', help='Calibrate gyro')
+		self.parser.add_argument('-l', '--level', action='store_true', help='Calibrate horizontal')
+		self.parser.add_argument('-s', '--silent', action='store_true', help='Print less to console')
+		self.parser.add_argument('-n', '--now', action='store_true', help='Start drive now (do not wait for start button)')
 		self.args = self.parser.parse_args()
 		# print(f"% command line arguments: white {self.args.white}, gyro={self.args.gyro}, level={self.args.level}")
 		if self.args.gyro:
